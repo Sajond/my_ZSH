@@ -1,3 +1,6 @@
-#include <stdio.h> 
+#include "Zsh.h"
 
-//initial commit for repo initialisation    
+void initialise_shell(){
+    
+}
+
