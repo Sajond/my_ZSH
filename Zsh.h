@@ -10,8 +10,9 @@ typedef int (*builtin_func_t)(int argc, char **argv);
 
 typedef struct {
 	const char *name;         /* builtin name, e.g. "cd" */
+	char **envp; 
 	builtin_func_t function;  /* callable as builtin[i].function */
-} builtin_t;
+} shell_t;
 
 /* Example declaration (define the array in a .c file):
  * builtin_t builtins[] = { {"cd", builtin_cd}, {"exit", builtin_exit} };
