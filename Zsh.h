@@ -2,6 +2,7 @@
 #include <unistd.h> 
 #include <stdlib.h> 
 #include <stdio.h>
+#include <string.h>
 
 /* Builtin command descriptor
  * defines a type which is a pointer to a function that takes argc and argvv (as most builtins will) args will be defined by the parser. 
@@ -13,7 +14,6 @@ typedef struct {
 	builtin_func_t function;  /* callable as builtin[i].function */
 } builtin_t;
 
-//!builtin list is fixed to size of 9 entries (8 + NULL entry for ending)
 /* Example declaration (define the array in a .c file):
  * builtin_t builtins[] = { {"cd", builtin_cd}, {"exit", builtin_exit} };
  */
@@ -29,5 +29,7 @@ typedef struct {
 
 // ----------------------------------------------------------- FUNCTION DECLARATIONS ----------------------------------------------------------------------------------------------
 int initialise_shell(shell_t *shell, char **envp); 
+char **copy_env(char **envp); 
+void free_env(char **new_env); 
 
 
