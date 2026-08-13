@@ -16,7 +16,7 @@ int shell_loop(shell_t *shell){
 
     while(shell->running){
         if(print_base_prompt() != 0){perror("Could not get CWD: Fatal error"); exit_status = 1; break;} // no cwd present
-        
+
         if(getline(&line, &size, stdin) == -1){perror("Failed to get line from stdin"); exit_status = 1; break;}
         // line is valid - > parse
 
@@ -65,6 +65,11 @@ int print_base_prompt(){
     return 0;
    
 };
+
+int parse_input(int argc, char **argv, char *line){
+
+}
+
 // ------------------------------------------------------------------------------------------------ BUILTIN ARRAY ----------------------------------------------------------------------------------------------
 builtin_t builtins_list[]= {
     {"echo", builtin_echo}, 
