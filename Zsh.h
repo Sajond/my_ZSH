@@ -33,4 +33,5 @@ char **copy_env(char **envp);
 void free_env(char **new_env); 
 
 // ----------------------------------------------------------- BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
+int builtin_echo(int argc, char **argv);
 

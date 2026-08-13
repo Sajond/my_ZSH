@@ -11,6 +11,11 @@
     return 1;   
 } // shell is ready for main loop
 
+int shell_loop(shell_t *shell){
+    while(shell->running){
+
+    }
+}
 // ------------------------------------------------------------------------------------------------ FUNCTIONS ----------------------------------------------------------------------------------------------
 
 //! TECHNICALLY STRLEN AND STRCPY are not allowed but i dont see the point, it just makes the project unecessarily repetitive. 
@@ -54,8 +59,19 @@ builtin_t builtins_list[]= {
 }; 
 
 // ------------------------------------------------------------------------------------------------ BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
+//! USES STRLEN FUNCTION
+int builtin_echo(int argc, char **argv){
+    for (int i = 1; argv[i] != NULL; i++){
+            write(1, argv[i], strlen(argv[i])); 
+            
+            if(argv[i + 1] != NULL){
+                write(1, " ", 1); 
+            }
+    }
+    write(1,"\n", 1); 
+    return 0; 
+}; 
 
-builtin_echo(){}; 
 builtin_cd(){}; 
 builtin_setenv(){}; 
 builtin_unsetenv(){}; 
