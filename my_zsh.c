@@ -12,10 +12,14 @@
 } // shell is ready for main loop
 
 int shell_loop(shell_t *shell){
-    int exit_status = 0; int argc; char **argv; char *line; 
+    int exit_status = 0; int argc; char **argv; char *line; size_t size = 0; 
 
     while(shell->running){
         if(print_base_prompt() != 0){perror("Could not get CWD: Fatal error"); exit_status = 1; break;} // no cwd present
+        
+        if(getline(&line, &size, stdin) == -1){perror("Failed to get line from stdin"); exit_status = 1; break;}
+        // line is valid - > parse
+
     }
 
     //on break free the shell and exit
