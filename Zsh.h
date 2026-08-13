@@ -29,8 +29,10 @@ typedef struct {
 
 // ----------------------------------------------------------- FUNCTION DECLARATIONS ----------------------------------------------------------------------------------------------
 int initialise_shell(shell_t *shell, char **envp); 
+int shell_loop(shell_t *shell); 
 char **copy_env(char **envp); 
 void free_env(char **new_env); 
+int print_base_prompt(); 
 
 // ----------------------------------------------------------- BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 int builtin_echo(int argc, char **argv);

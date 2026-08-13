@@ -12,9 +12,15 @@
 } // shell is ready for main loop
 
 int shell_loop(shell_t *shell){
-    while(shell->running){
+    int exit_status = 0; int argc; char **argv; char *line; 
 
+    while(shell->running){
+        if(print_base_prompt() != 0){perror("Could not get CWD: Fatal error"); exit_status = 1; break;} // no cwd present
     }
+
+    //on break free the shell and exit
+    free_env(shell->shell_envp); 
+    return exit_status; 
 }
 // ------------------------------------------------------------------------------------------------ FUNCTIONS ----------------------------------------------------------------------------------------------
 
@@ -45,6 +51,16 @@ void free_env(char **new_env){
     free(new_env); 
 }
 
+int print_base_prompt(){
+   char *cwd = getcwd(NULL, 0); 
+   if(cwd == NULL){return 1;} 
+    write(1, "[", 1); 
+    write(1, cwd, strlen(cwd));
+    write(1, "]>", 2); 
+    free(cwd);
+    return 0;
+   
+};
 // ------------------------------------------------------------------------------------------------ BUILTIN ARRAY ----------------------------------------------------------------------------------------------
 builtin_t builtins_list[]= {
     {"echo", builtin_echo}, 
@@ -63,7 +79,7 @@ builtin_t builtins_list[]= {
 int builtin_echo(int argc, char **argv){
     for (int i = 1; argv[i] != NULL; i++){
             write(1, argv[i], strlen(argv[i])); 
-            
+
             if(argv[i + 1] != NULL){
                 write(1, " ", 1); 
             }
