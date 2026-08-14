@@ -1,11 +1,30 @@
 #include "Zsh.h"
 
+// ------------------------------------------------------------------------------------------------ BUILTIN ARRAY ----------------------------------------------------------------------------------------------
+builtin_t builtins_list[]= {
+    {"echo", builtin_echo}, 
+    //?DEBUG
+    /*
+    {"cd", builtin_cd},
+    {"setenv", builtin_setenv},
+    {"unsetenv", builtin_unsetenv},
+    {"env", builtin_env},
+    {"exit", builtin_exit},
+    {"pwd", builtin_pwd},
+    {"which", builtin_which},
+    */
+    {NULL, NULL}
+}; 
+
 // ------------------------------------------------------------------------------------------------ CONTROL FUNCTIONS ----------------------------------------------------------------------------------------------
 
  int initialise_shell(shell_t *shell, char **envp){
-    if(shell->shell_envp = copy_env(envp) != NULL){
+    shell->shell_envp = copy_env(envp); 
+    if(shell->shell_envp != NULL){
         shell->running = 1; 
         shell->builtins = builtins_list;
+        //?DEBUG 
+        printf("Shell intiialised\n"); 
         return 0; 
     } 
     return 1;   
@@ -21,11 +40,26 @@ int shell_loop(shell_t *shell){
         if(print_base_prompt() != 0){perror("Could not get CWD: Fatal error"); exit_status = 1; break;} // no cwd present
 
         if(getline(&line, &size, stdin) == -1){perror("Failed to get line from stdin"); exit_status = 1; break;}
+
+        //?DEBUG 
+        printf("received line: %s\n", line); 
+        printf("line size is: %zu\n", size); 
+       
         tokenise_input(&token_count, argv, line);        // line is valid - > parse
+
+        //?DEBUG token print
+        for(int i = 0; argv[i] != NULL; i++){
+            printf("argv [%d] = %s\n", i, argv[i]); 
+            if(argv[i + 1] == NULL){printf("argv [%d] = NULL\n", i + 1);}
+        }
 
         //check type
         //execute command
+        
         free(line); // must be free before next iteration after execution. 
+
+        //?DEBUG
+        printf("Reached end of iteration, waiting for next input\n");
     }
     cleanup:     //on break free the shell and exit
     free_env(shell->shell_envp); 
@@ -87,22 +121,13 @@ void tokenise_input(int *argc, char **argv, char *line){
     *argc = count; 
 }
 
-// ------------------------------------------------------------------------------------------------ BUILTIN ARRAY ----------------------------------------------------------------------------------------------
-builtin_t builtins_list[]= {
-    {"echo", builtin_echo}, 
-    {"cd", builtin_cd},
-    {"setenv", builtin_setenv},
-    {"unsetenv", builtin_unsetenv},
-    {"env", builtin_env},
-    {"exit", builtin_exit},
-    {"pwd", builtin_pwd},
-    {"which", builtin_which},
-    {NULL, NULL}
-}; 
+
 
 // ------------------------------------------------------------------------------------------------ BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 //! USES STRLEN FUNCTION
 int builtin_echo(int argc, char **argv){
+    (void)argc;
+
     for (int i = 1; argv[i] != NULL; i++){
             write(1, argv[i], strlen(argv[i])); 
 
@@ -114,6 +139,7 @@ int builtin_echo(int argc, char **argv){
     return 0; 
 }; 
 
+/*
 builtin_cd(){}; 
 builtin_setenv(){}; 
 builtin_unsetenv(){}; 
@@ -121,3 +147,4 @@ builtin_env(){};
 builtin_exit(){}; 
 builtin_pwd(){}; 
 builtin_which(){}; 
+*/
