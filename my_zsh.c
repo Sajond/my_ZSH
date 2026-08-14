@@ -12,18 +12,24 @@
 } // shell is ready for main loop
 
 int shell_loop(shell_t *shell){
-    int exit_status = 0; int argc; char **argv; char *line; size_t size = 0; 
+    int exit_status = 0; int token_count; char **argv; char *line = NULL; size_t size = 0; 
+
+    argv = malloc(sizeof(char *) * (MAX_ARGS + 1) ); 
+    if(argv == NULL){perror("Malloc for argv failed\n"); exit_status = 1; goto cleanup;}
 
     while(shell->running){
         if(print_base_prompt() != 0){perror("Could not get CWD: Fatal error"); exit_status = 1; break;} // no cwd present
 
         if(getline(&line, &size, stdin) == -1){perror("Failed to get line from stdin"); exit_status = 1; break;}
-        // line is valid - > parse
+        tokenise_input(&token_count, argv, line);        // line is valid - > parse
 
+        //check type
+        //execute command
+        free(line); // must be free before next iteration after execution. 
     }
-
-    //on break free the shell and exit
+    cleanup:     //on break free the shell and exit
     free_env(shell->shell_envp); 
+    free(argv); 
     return exit_status; 
 }
 // ------------------------------------------------------------------------------------------------ FUNCTIONS ----------------------------------------------------------------------------------------------
@@ -66,8 +72,19 @@ int print_base_prompt(){
    
 };
 
-int parse_input(int argc, char **argv, char *line){
+//call with &argc and &argv / tokencount token 
+//!strtok to be replaced with own version. 
+void tokenise_input(int *argc, char **argv, char *line){
+    int count = 0; 
+    char *token = strtok(line, DELIM);
 
+    while(token != NULL){
+        argv[count] = token; 
+        count++; 
+        token = strtok(NULL, DELIM);
+    }
+    argv[count] = NULL;
+    *argc = count; 
 }
 
 // ------------------------------------------------------------------------------------------------ BUILTIN ARRAY ----------------------------------------------------------------------------------------------

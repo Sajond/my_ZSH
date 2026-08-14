@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#define DELIM " "
+#define MAX_ARGS 100 //used to avoid double pass in tokeniser (100 args is reasonable for a shell)
+
 /* Builtin command descriptor
  * defines a type which is a pointer to a function that takes argc and argvv (as most builtins will) args will be defined by the parser. 
  */
@@ -33,6 +36,7 @@ int shell_loop(shell_t *shell);
 char **copy_env(char **envp); 
 void free_env(char **new_env); 
 int print_base_prompt(); 
+void tokenise_input(int *argc, char **argv, char *line); 
 
 // ----------------------------------------------------------- BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 int builtin_echo(int argc, char **argv);

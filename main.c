@@ -9,4 +9,6 @@ int main(int argc, char **argv, char **envp){
 
 
   cleanup: 
+  return exit_status; 
+
 }
