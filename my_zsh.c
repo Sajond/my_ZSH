@@ -42,24 +42,32 @@ int shell_loop(shell_t *shell){
         if(getline(&line, &size, stdin) == -1){perror("Failed to get line from stdin"); exit_status = 1; break;}
 
         //?DEBUG 
-        printf("received line: %s\n", line); 
-        printf("line size is: %zu\n", size); 
+        //printf("received line: %s\n", line); 
+        //printf("line size is: %zu\n", size); 
        
         tokenise_input(&token_count, argv, line);        // line is valid - > parse
 
+        /*
         //?DEBUG token print
         for(int i = 0; argv[i] != NULL; i++){
             printf("argv [%d] = %s\n", i, argv[i]); 
             if(argv[i + 1] == NULL){printf("argv [%d] = NULL\n", i + 1);}
         }
+        */
 
-        //check type
-        //execute command
+        //TODO check type
+        if(exists_as_builtin(argv[0], builtins_list)){
+            // execute builtin command
+        } else{ 
+            //check it exists in path (env)
+        }
+
+        //TODO execute command
         
         free(line); // must be free before next iteration after execution. 
 
         //?DEBUG
-        printf("Reached end of iteration, waiting for next input\n");
+        //printf("Reached end of iteration, waiting for next input\n");
     }
     cleanup:     //on break free the shell and exit
     free_env(shell->shell_envp); 
@@ -119,6 +127,20 @@ void tokenise_input(int *argc, char **argv, char *line){
     }
     argv[count] = NULL;
     *argc = count; 
+}
+
+//!USES STRCMP
+int exists_as_builtin(char **argv, builtin_t *builtins_list){
+
+    int i = 0; 
+    while(builtins_list[i].name != NULL){
+        if(strcmp(argv[0], builtins_list[i].name) == 0){
+            return 1; 
+        } else {
+            i++; 
+        }
+    }
+    return 0; 
 }
 
 
