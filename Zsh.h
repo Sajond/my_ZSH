@@ -3,9 +3,11 @@
 #include <stdlib.h> 
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #define DELIM " "
 #define MAX_ARGS 100 //used to avoid double pass in tokeniser (100 args is reasonable for a shell)
+#define PATH_PREFIX "PATH="
 
 /* Builtin command descriptor
  * defines a type which is a pointer to a function that takes argc and argvv (as most builtins will) args will be defined by the parser. 
@@ -37,7 +39,9 @@ char **copy_env(char **envp);
 void free_env(char **new_env); 
 int print_base_prompt(); 
 void tokenise_input(int *argc, char **argv, char *line); 
-
+void check_function_type(char **argv, builtin_t *builtins_list, int token_count, shell_t *shell ); 
+int exists_as_builtin(char **argv, builtin_t *builtins_list); 
+char *find_programme_path(shell_t *shell, char**argv); 
 // ----------------------------------------------------------- BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
-void builtin_echo(int argc, char **argv);
+void builtin_echo(int argc, char **argv, shell_t *shell);
 

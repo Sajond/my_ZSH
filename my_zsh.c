@@ -31,7 +31,7 @@ builtin_t builtins_list[]= {
 } // shell is ready for main loop
 
 int shell_loop(shell_t *shell){
-    int exit_status = 0; int token_count; char **argv; char *line = NULL; size_t size = 0; 
+    int exit_status = 0; int token_count; char **argv; char *line = NULL; size_t size = 0; char *path; 
 
     argv = malloc(sizeof(char *) * (MAX_ARGS + 1) ); 
     if(argv == NULL){perror("Malloc for argv failed\n"); exit_status = 1; goto cleanup;}
@@ -54,13 +54,9 @@ int shell_loop(shell_t *shell){
             if(argv[i + 1] == NULL){printf("argv [%d] = NULL\n", i + 1);}
         }
         */
-
-        //TODO check type 
-        //TODO execute command
+        
        check_function_type(argv, builtins_list, token_count, shell); 
-
-        
-        
+ 
         free(line); // must be free before next iteration after execution. 
 
         //?DEBUG
@@ -71,12 +67,17 @@ int shell_loop(shell_t *shell){
     free(argv); 
     return exit_status; 
 }
+//TODO to finish this and programme path finding. 
 void check_function_type(char **argv, builtin_t *builtins_list, int token_count, shell_t *shell ){
     int index; 
     if((index = exists_as_builtin(argv, builtins_list)) != -1){
         builtins_list[index].function(token_count, argv, shell);
     } else{ 
-        //search for the function in path
+        //todo NOT FULL ALLOCATION, to be finished
+        char *programme_path; 
+        if(programme_path = find_programme_path(shell, argv) != NULL){
+
+        }
     }
 
 }
@@ -149,12 +150,54 @@ int exists_as_builtin(char **argv, builtin_t *builtins_list){
     return -1; 
 }
 
+//!Uses strcpy and strlen 
+char *find_programme_path(shell_t *shell, char**argv){
+    int i = 0; 
+    
 
+    while(shell->shell_envp[i] != NULL){
+        //for every string at position I, check the beginning to see if it matches PATH=
+        if(strncmp(shell->shell_envp[i], PATH_PREFIX, 5) != 0){
+            i++;} 
+        else{
+            //try possible paths
+            char *path_string = malloc(strlen(shell->shell_envp[i]) + 1);
+            if(path_string == NULL){perror("Malloc failed\n"); return NULL;}
+            strcpy(path_string, shell->shell_envp[i]);
+            char *directories = path_string + 5; 
+            char *directory = strtok(directories, ":"); 
+
+            while(directory != NULL){
+                char *full_path = malloc(strlen(directory) + strlen(argv[0]) + 2); 
+                if(full_path == NULL){perror("Fullpath malloc failed\n"); free(path_string);  return NULL;}
+                //!strncat needs null terminated string to work. 
+                full_path[0] = '\0'; 
+                strncat(full_path, directory, strlen(directory)); 
+                strncat(full_path, "/", 1); 
+                strncat(full_path, argv[0], strlen(argv[0])); 
+
+                struct stat file_info; 
+                if(stat(full_path, &file_info) == 0 && S_ISREG(file_info.st_mode) && (file_info.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))){
+                    //file exists & is an executable file 
+                    free(path_string); 
+                    return full_path; 
+                } else { 
+                    free(full_path); 
+                    directory = strtok(NULL, ":"); 
+                }
+            }
+            free(path_string); 
+        }
+      
+    }
+    return NULL;
+}
 
 // ------------------------------------------------------------------------------------------------ BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 //! USES STRLEN FUNCTION
-void builtin_echo(int argc, char **argv){
+void builtin_echo(int argc, char **argv, shell_t *shell){
     (void)argc;
+    (void)shell; 
 
     for (int i = 1; argv[i] != NULL; i++){
             write(1, argv[i], strlen(argv[i])); 
@@ -176,3 +219,6 @@ builtin_exit(){};
 builtin_pwd(){}; 
 builtin_which(){}; 
 */
+
+//TODO: Replace string functions with own version? 
+//TODO: strncat needs to be replaced with custom version. 
