@@ -55,14 +55,11 @@ int shell_loop(shell_t *shell){
         }
         */
 
-        //TODO check type
-        if(exists_as_builtin(argv[0], builtins_list)){
-            // execute builtin command
-        } else{ 
-            //check it exists in path (env)
-        }
-
+        //TODO check type 
         //TODO execute command
+       check_function_type(argv, builtins_list, token_count, shell); 
+
+        
         
         free(line); // must be free before next iteration after execution. 
 
@@ -73,6 +70,15 @@ int shell_loop(shell_t *shell){
     free_env(shell->shell_envp); 
     free(argv); 
     return exit_status; 
+}
+void check_function_type(char **argv, builtin_t *builtins_list, int token_count, shell_t *shell ){
+    int index; 
+    if((index = exists_as_builtin(argv, builtins_list)) != -1){
+        builtins_list[index].function(token_count, argv, shell);
+    } else{ 
+        //search for the function in path
+    }
+
 }
 // ------------------------------------------------------------------------------------------------ FUNCTIONS ----------------------------------------------------------------------------------------------
 
@@ -135,19 +141,19 @@ int exists_as_builtin(char **argv, builtin_t *builtins_list){
     int i = 0; 
     while(builtins_list[i].name != NULL){
         if(strcmp(argv[0], builtins_list[i].name) == 0){
-            return 1; 
+            return i;
         } else {
             i++; 
         }
     }
-    return 0; 
+    return -1; 
 }
 
 
 
 // ------------------------------------------------------------------------------------------------ BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 //! USES STRLEN FUNCTION
-int builtin_echo(int argc, char **argv){
+void builtin_echo(int argc, char **argv){
     (void)argc;
 
     for (int i = 1; argv[i] != NULL; i++){
@@ -158,7 +164,7 @@ int builtin_echo(int argc, char **argv){
             }
     }
     write(1,"\n", 1); 
-    return 0; 
+    
 }; 
 
 /*

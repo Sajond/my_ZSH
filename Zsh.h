@@ -10,7 +10,7 @@
 /* Builtin command descriptor
  * defines a type which is a pointer to a function that takes argc and argvv (as most builtins will) args will be defined by the parser. 
  */
-typedef int (*builtin_func_t)(int argc, char **argv);
+typedef int (*builtin_func_t)(int argc, char **argv, shell_t *shell);
 
 typedef struct {
 	const char *name;         /* builtin name, e.g. "cd" */
@@ -39,5 +39,5 @@ int print_base_prompt();
 void tokenise_input(int *argc, char **argv, char *line); 
 
 // ----------------------------------------------------------- BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
-int builtin_echo(int argc, char **argv);
+void builtin_echo(int argc, char **argv);
 
