@@ -31,7 +31,7 @@ builtin_t builtins_list[]= {
 } // shell is ready for main loop
 
 int shell_loop(shell_t *shell){
-    int exit_status = 0; int token_count; char **argv; char *line = NULL; size_t size = 0; char *path; 
+    int exit_status = 0; int token_count; char **argv; char *line = NULL; size_t size = 0; // removed for compile test: char *path; 
 
     argv = malloc(sizeof(char *) * (MAX_ARGS + 1) ); 
     if(argv == NULL){perror("Malloc for argv failed\n"); exit_status = 1; goto cleanup;}
@@ -72,14 +72,20 @@ void check_function_type(char **argv, builtin_t *builtins_list, int token_count,
     int index; 
     if((index = exists_as_builtin(argv, builtins_list)) != -1){
         builtins_list[index].function(token_count, argv, shell);
+        //DEBUG
+        printf("DEBUG: programme executed as builtin\n"); 
     } else{ 
         //todo NOT FULL ALLOCATION, to be finished
         char *programme_path; 
-        if(programme_path = find_programme_path(shell, argv) != NULL){
+        if((programme_path = find_programme_path(shell, argv)) != NULL){
+            //todo Execute programme -> using fork and execve
+            //debug 
+            printf("DEBUG: programme path is: %s. Ready for fork and execution\n", programme_path); 
 
         }
     }
-
+//bebug prints
+exit(EXIT_SUCCESS); //!REMOVE THIS KILLS SHELL
 }
 // ------------------------------------------------------------------------------------------------ FUNCTIONS ----------------------------------------------------------------------------------------------
 
@@ -173,29 +179,36 @@ char *find_programme_path(shell_t *shell, char**argv){
                 //!strncat needs null terminated string to work. 
                 full_path[0] = '\0'; 
                 strncat(full_path, directory, strlen(directory)); 
-                strncat(full_path, "/", 1); 
+                strcat(full_path, "/"); 
                 strncat(full_path, argv[0], strlen(argv[0])); 
+                //DEBUG
 
                 struct stat file_info; 
+
                 if(stat(full_path, &file_info) == 0 && S_ISREG(file_info.st_mode) && (file_info.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))){
                     //file exists & is an executable file 
                     free(path_string); 
+                    printf("DEBUG: PATH executable found\n"); 
                     return full_path; 
                 } else { 
+                    //DEBUG
+                    perror("stat"); 
                     free(full_path); 
                     directory = strtok(NULL, ":"); 
                 }
             }
             free(path_string); 
+            return NULL; 
         }
       
     }
+    printf("DEBUG: programme doesnt exist\n");
     return NULL;
 }
 
 // ------------------------------------------------------------------------------------------------ BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 //! USES STRLEN FUNCTION
-void builtin_echo(int argc, char **argv, shell_t *shell){
+int builtin_echo(int argc, char **argv, shell_t *shell){
     (void)argc;
     (void)shell; 
 
@@ -208,6 +221,7 @@ void builtin_echo(int argc, char **argv, shell_t *shell){
     }
     write(1,"\n", 1); 
     
+    return 0; 
 }; 
 
 /*

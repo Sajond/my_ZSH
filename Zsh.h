@@ -5,33 +5,33 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#define DELIM " "
+#define DELIM " \t\n"
 #define MAX_ARGS 100 //used to avoid double pass in tokeniser (100 args is reasonable for a shell)
 #define PATH_PREFIX "PATH="
 
 /* Builtin command descriptor
  * defines a type which is a pointer to a function that takes argc and argvv (as most builtins will) args will be defined by the parser. 
  */
+
+typedef struct shell shell_t;
+typedef struct builtin builtin_t;
+
 typedef int (*builtin_func_t)(int argc, char **argv, shell_t *shell);
 
-typedef struct {
+typedef struct builtin {
 	const char *name;         /* builtin name, e.g. "cd" */
 	builtin_func_t function;  /* callable as builtin[i].function */
 } builtin_t;
 
-/* Example declaration (define the array in a .c file):
- * builtin_t builtins[] = { {"cd", builtin_cd}, {"exit", builtin_exit} };
- */
-
- typedef struct
- {
+ typedef struct shell{
 	int running; 
 	char **shell_envp; 
 	builtin_t *builtins; 
-
  } shell_t;
- 
 
+/* Example declaration (define the array in a .c file):
+ * builtin_t builtins[] = { {"cd", builtin_cd}, {"exit", builtin_exit} };
+ */
 // ----------------------------------------------------------- FUNCTION DECLARATIONS ----------------------------------------------------------------------------------------------
 int initialise_shell(shell_t *shell, char **envp); 
 int shell_loop(shell_t *shell); 
@@ -43,5 +43,5 @@ void check_function_type(char **argv, builtin_t *builtins_list, int token_count,
 int exists_as_builtin(char **argv, builtin_t *builtins_list); 
 char *find_programme_path(shell_t *shell, char**argv); 
 // ----------------------------------------------------------- BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
-void builtin_echo(int argc, char **argv, shell_t *shell);
+int builtin_echo(int argc, char **argv, shell_t *shell);
 
