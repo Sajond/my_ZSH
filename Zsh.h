@@ -41,7 +41,11 @@ int print_base_prompt();
 void tokenise_input(int *argc, char **argv, char *line); 
 void check_function_type(char **argv, builtin_t *builtins_list, int token_count, shell_t *shell ); 
 int exists_as_builtin(char **argv, builtin_t *builtins_list); 
-char *find_programme_path(shell_t *shell, char**argv); 
+char *find_programme_path(shell_t *shell, char**argv);
+void build_full_path(char *full_path, char *directory, char **argv); 
+char *search_path(shell_t *shell, char **argv, int i);
+char *search_directory(char *directory, char **argv); 
+
 // ----------------------------------------------------------- BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 int builtin_echo(int argc, char **argv, shell_t *shell);
 

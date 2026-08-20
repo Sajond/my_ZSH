@@ -57,12 +57,11 @@ int shell_loop(shell_t *shell){
         
        check_function_type(argv, builtins_list, token_count, shell); 
  
-        free(line); // must be free before next iteration after execution. 
-
         //?DEBUG
         //printf("Reached end of iteration, waiting for next input\n");
     }
     cleanup:     //on break free the shell and exit
+    free(line); 
     free_env(shell->shell_envp); 
     free(argv); 
     return exit_status; 
@@ -77,15 +76,16 @@ void check_function_type(char **argv, builtin_t *builtins_list, int token_count,
     } else{ 
         //todo NOT FULL ALLOCATION, to be finished
         char *programme_path; 
+
         if((programme_path = find_programme_path(shell, argv)) != NULL){
             //todo Execute programme -> using fork and execve
             //debug 
             printf("DEBUG: programme path is: %s. Ready for fork and execution\n", programme_path); 
-
         }
+        //else loop continues 
     }
 //bebug prints
-exit(EXIT_SUCCESS); //!REMOVE THIS KILLS SHELL
+//exit(EXIT_SUCCESS); //!REMOVE THIS KILLS SHELL
 }
 // ------------------------------------------------------------------------------------------------ FUNCTIONS ----------------------------------------------------------------------------------------------
 
@@ -141,7 +141,6 @@ void tokenise_input(int *argc, char **argv, char *line){
     argv[count] = NULL;
     *argc = count; 
 }
-
 //!USES STRCMP
 int exists_as_builtin(char **argv, builtin_t *builtins_list){
 
@@ -155,55 +154,66 @@ int exists_as_builtin(char **argv, builtin_t *builtins_list){
     }
     return -1; 
 }
-
-//!Uses strcpy and strlen 
+//!Uses STRCPY & STRLEN
 char *find_programme_path(shell_t *shell, char**argv){
     int i = 0; 
-    
-
     while(shell->shell_envp[i] != NULL){
         //for every string at position I, check the beginning to see if it matches PATH=
         if(strncmp(shell->shell_envp[i], PATH_PREFIX, 5) != 0){
             i++;} 
         else{
-            //try possible paths
-            char *path_string = malloc(strlen(shell->shell_envp[i]) + 1);
-            if(path_string == NULL){perror("Malloc failed\n"); return NULL;}
-            strcpy(path_string, shell->shell_envp[i]);
-            char *directories = path_string + 5; 
-            char *directory = strtok(directories, ":"); 
-
-            while(directory != NULL){
-                char *full_path = malloc(strlen(directory) + strlen(argv[0]) + 2); 
-                if(full_path == NULL){perror("Fullpath malloc failed\n"); free(path_string);  return NULL;}
-                //!strncat needs null terminated string to work. 
-                full_path[0] = '\0'; 
-                strncat(full_path, directory, strlen(directory)); 
-                strcat(full_path, "/"); 
-                strncat(full_path, argv[0], strlen(argv[0])); 
-                //DEBUG
-
-                struct stat file_info; 
-
-                if(stat(full_path, &file_info) == 0 && S_ISREG(file_info.st_mode) && (file_info.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))){
-                    //file exists & is an executable file 
-                    free(path_string); 
-                    printf("DEBUG: PATH executable found\n"); 
-                    return full_path; 
-                } else { 
-                    //DEBUG
-                    perror("stat"); 
-                    free(full_path); 
-                    directory = strtok(NULL, ":"); 
-                }
-            }
-            free(path_string); 
-            return NULL; 
-        }
-      
+           char *result = search_path(shell, argv, i); 
+           return result; 
+        }   
     }
     printf("DEBUG: programme doesnt exist\n");
     return NULL;
+}
+//! REPLACE WITH NON STRNCAT VERSION 
+void build_full_path(char *full_path, char *directory, char **argv){
+    full_path[0] = '\0'; 
+    strncat(full_path, directory, strlen(directory)); 
+    strcat(full_path, "/"); 
+    strncat(full_path, argv[0], strlen(argv[0])); 
+}
+//!STRLEN 
+char *search_path(shell_t *shell, char **argv, int i){
+    char *path_string = malloc(strlen(shell->shell_envp[i]) + 1);
+        if(path_string == NULL){perror("Malloc failed\n"); return NULL;}
+        strcpy(path_string, shell->shell_envp[i]);
+        char *directories = path_string + 5; 
+        char *directory = strtok(directories, ":"); 
+
+        while(directory != NULL){
+            char *result = search_directory(directory, argv); 
+            if(result != NULL){
+                free(path_string); 
+                return result; 
+            }
+            directory = strtok(NULL, ":"); 
+        }
+      free(path_string); 
+      return NULL; 
+}
+//!STRLEN
+char *search_directory(char *directory, char **argv){
+    char *full_path = malloc(strlen(directory) + strlen(argv[0]) + 2); 
+    if(full_path == NULL){perror("Fullpath malloc failed\n"); return NULL;}
+    
+    build_full_path(full_path, directory, argv); 
+
+         struct stat file_info; 
+
+        if(stat(full_path, &file_info) == 0 && S_ISREG(file_info.st_mode) && (file_info.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))){
+            //file exists & is an executable file 
+            printf("DEBUG: PATH executable found\n"); 
+            return full_path; 
+
+            } else { 
+            free(full_path); 
+            }
+
+    return NULL; 
 }
 
 // ------------------------------------------------------------------------------------------------ BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
