@@ -55,7 +55,9 @@ int shell_loop(shell_t *shell){
         }
         */
         
-       check_function_type(argv, builtins_list, token_count, shell); 
+       if(token_count > 0){
+        check_function_type(argv, builtins_list, token_count, shell); 
+       }
  
         //?DEBUG
         //printf("Reached end of iteration, waiting for next input\n");
@@ -85,7 +87,7 @@ void check_function_type(char **argv, builtin_t *builtins_list, int token_count,
         //else loop continues 
     }
 //bebug prints
-//exit(EXIT_SUCCESS); //!REMOVE THIS KILLS SHELL
+exit(EXIT_SUCCESS); //!REMOVE THIS KILLS SHELL
 }
 // ------------------------------------------------------------------------------------------------ FUNCTIONS ----------------------------------------------------------------------------------------------
 
