@@ -68,7 +68,6 @@ int shell_loop(shell_t *shell){
     free(argv); 
     return exit_status; 
 }
-//TODO to finish this and programme path finding. 
 void execute_command(char **argv, builtin_t *builtins_list, int token_count, shell_t *shell ){
     int index; 
     if((index = exists_as_builtin(argv, builtins_list)) != -1){
@@ -76,23 +75,16 @@ void execute_command(char **argv, builtin_t *builtins_list, int token_count, she
         //DEBUG
         printf("DEBUG: programme executed as builtin\n"); 
     } else{ 
-        //todo NOT FULL ALLOCATION, to be finished
         char *programme_path; 
 
         if((programme_path = find_programme_path(shell, argv)) != NULL){
-            //todo Execute programme -> using fork and execve
             if(execute_programme_path(programme_path, argv, shell) != 0){
                 perror("Error with programme path execution\n"); 
-            }
-            
+            }      
         }
-        perror(""); 
-        //else loop continues 
         free(programme_path); 
+        perror("");
     }
-   
-//bebug prints
-exit(EXIT_SUCCESS); //!REMOVE THIS KILLS SHELL
 }
 // ------------------------------------------------------------------------------------------------ FUNCTIONS ----------------------------------------------------------------------------------------------
 
@@ -269,15 +261,18 @@ int builtin_echo(int argc, char **argv, shell_t *shell){
     return 0; 
 }; 
 
+//builtin_exit(){}; 
+
 /*
 builtin_cd(){}; 
 builtin_setenv(){}; 
 builtin_unsetenv(){}; 
 builtin_env(){}; 
-builtin_exit(){}; 
+
 builtin_pwd(){}; 
 builtin_which(){}; 
 */
 
 //TODO: Replace string functions with own version? 
 //TODO: strncat needs to be replaced with custom version. 
+//TODO: implement builtins. 
