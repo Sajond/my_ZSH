@@ -45,6 +45,8 @@ char *find_programme_path(shell_t *shell, char**argv);
 void build_full_path(char *full_path, char *directory, char **argv); 
 char *search_path(shell_t *shell, char **argv, int i);
 char *search_directory(char *directory, char **argv); 
+int execute_programme_path(char *programme_path, char **argv, shell_t *shell); 
+
 
 // ----------------------------------------------------------- BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 int builtin_echo(int argc, char **argv, shell_t *shell);

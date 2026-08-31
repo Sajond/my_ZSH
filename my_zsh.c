@@ -81,11 +81,16 @@ void check_function_type(char **argv, builtin_t *builtins_list, int token_count,
 
         if((programme_path = find_programme_path(shell, argv)) != NULL){
             //todo Execute programme -> using fork and execve
-            //debug 
-            printf("DEBUG: programme path is: %s. Ready for fork and execution\n", programme_path); 
+            if(execute_programme_path(programme_path, argv, shell) != 0){
+                perror("Error with programme path execution\n"); 
+            }
+            
         }
+        perror(""); 
         //else loop continues 
+        free(programme_path); 
     }
+   
 //bebug prints
 exit(EXIT_SUCCESS); //!REMOVE THIS KILLS SHELL
 }
@@ -218,6 +223,34 @@ char *search_directory(char *directory, char **argv){
     return NULL; 
 }
 
+int execute_programme_path(char *programme_path, char **argv, shell_t *shell){
+int status; 
+pid_t pid = fork(); 
+
+if(pid > 0){
+    //parent
+    waitpid(pid, &status, 0); 
+    if(WIFEXITED(status)){
+        if(WEXITSTATUS(status) != 0 ){
+            return 1; 
+        }
+        return 0; 
+
+    } else if(WIFSIGNALED(status)){
+        return 1;
+    }
+ 
+} else if(pid == 0){
+    //child
+    if(execve(programme_path, argv, shell->shell_envp) == -1){
+        perror("execve\n"); 
+        exit(1); 
+    }; 
+}
+perror("Fork failed\n"); 
+return 1; 
+
+}
 // ------------------------------------------------------------------------------------------------ BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 //! USES STRLEN FUNCTION
 int builtin_echo(int argc, char **argv, shell_t *shell){
