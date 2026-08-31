@@ -50,4 +50,5 @@ int execute_programme_path(char *programme_path, char **argv, shell_t *shell);
 
 // ----------------------------------------------------------- BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 int builtin_echo(int argc, char **argv, shell_t *shell);
+int builtin_exit(int argc, char **argv, shell_t *shell); 
 

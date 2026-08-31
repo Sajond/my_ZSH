@@ -3,13 +3,13 @@
 // ------------------------------------------------------------------------------------------------ BUILTIN ARRAY ----------------------------------------------------------------------------------------------
 builtin_t builtins_list[]= {
     {"echo", builtin_echo}, 
+    {"exit", builtin_exit},
     //?DEBUG
     /*
     {"cd", builtin_cd},
     {"setenv", builtin_setenv},
     {"unsetenv", builtin_unsetenv},
-    {"env", builtin_env},
-    {"exit", builtin_exit},
+    {"env", builtin_env},   
     {"pwd", builtin_pwd},
     {"which", builtin_which},
     */
@@ -81,9 +81,9 @@ void execute_command(char **argv, builtin_t *builtins_list, int token_count, she
             if(execute_programme_path(programme_path, argv, shell) != 0){
                 perror("Error with programme path execution\n"); 
             }      
-        }
+        } else {perror("");}
+        
         free(programme_path); 
-        perror("");
     }
 }
 // ------------------------------------------------------------------------------------------------ FUNCTIONS ----------------------------------------------------------------------------------------------
@@ -261,7 +261,12 @@ int builtin_echo(int argc, char **argv, shell_t *shell){
     return 0; 
 }; 
 
-//builtin_exit(){}; 
+int builtin_exit(int argc, char **argv, shell_t *shell){
+    (void)argc;
+    (void)argv; 
+    shell->running = 0; 
+    return 0; 
+}; 
 
 /*
 builtin_cd(){}; 
