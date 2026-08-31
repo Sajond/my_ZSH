@@ -56,7 +56,7 @@ int shell_loop(shell_t *shell){
         */
         
        if(token_count > 0){
-        check_function_type(argv, builtins_list, token_count, shell); 
+        execute_command(argv, builtins_list, token_count, shell); 
        }
  
         //?DEBUG
@@ -69,7 +69,7 @@ int shell_loop(shell_t *shell){
     return exit_status; 
 }
 //TODO to finish this and programme path finding. 
-void check_function_type(char **argv, builtin_t *builtins_list, int token_count, shell_t *shell ){
+void execute_command(char **argv, builtin_t *builtins_list, int token_count, shell_t *shell ){
     int index; 
     if((index = exists_as_builtin(argv, builtins_list)) != -1){
         builtins_list[index].function(token_count, argv, shell);
