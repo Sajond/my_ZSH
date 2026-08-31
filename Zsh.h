@@ -47,8 +47,8 @@ char *search_path(shell_t *shell, char **argv, int i);
 char *search_directory(char *directory, char **argv); 
 int execute_programme_path(char *programme_path, char **argv, shell_t *shell); 
 
-
 // ----------------------------------------------------------- BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 int builtin_echo(int argc, char **argv, shell_t *shell);
 int builtin_exit(int argc, char **argv, shell_t *shell); 
-
+int builtin_pwd(int argc, char **argv, shell_t *shell); 
+int builtin_which(int argc, char **argv, shell_t *shell); 

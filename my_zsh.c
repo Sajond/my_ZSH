@@ -82,7 +82,7 @@ void execute_command(char **argv, builtin_t *builtins_list, int token_count, she
                 perror("Error with programme path execution\n"); 
             }      
         } else {perror("");}
-        
+
         free(programme_path); 
     }
 }
@@ -267,15 +267,48 @@ int builtin_exit(int argc, char **argv, shell_t *shell){
     shell->running = 0; 
     return 0; 
 }; 
+//!USES STRLEN
+int builtin_pwd(int argc, char **argv, shell_t *shell){
+    (void) argc; 
+    (void)argv; 
+    (void)shell; 
+
+    char *working_dir = getcwd(NULL, 0);
+    if(working_dir == NULL){return 1;}
+    write(1, working_dir, strlen(working_dir)); 
+    free(working_dir); 
+    return 0; 
+}
+
+int builtin_which(int argc, char **argv, shell_t *shell){
+    (void)argc; 
+    int status = 0; 
+    //new argv given to allow functionality of find programme functioin, else would read the command as part of the path search.    
+    char **temp_argv = malloc(sizeof(char *) * 2); 
+    if(temp_argv == NULL){perror("'Which malloc failed'\n"); return 1;}
+    temp_argv[0] = argv[1]; 
+    temp_argv[1] = NULL; 
+
+    char *path = NULL; 
+    if ((path = find_programme_path(shell, temp_argv)) != NULL){
+        write(1, path, strlen(path)); 
+        free(path); 
+
+    } else {
+        status = 1;
+    }
+
+    free(temp_argv); 
+    return status; 
+}
 
 /*
-builtin_cd(){}; 
-builtin_setenv(){}; 
-builtin_unsetenv(){}; 
-builtin_env(){}; 
+builtin_cd(int argc, char **argv, shell_t *shell){}; 
+builtin_setenv(int argc, char **argv, shell_t *shell){}; 
+builtin_unsetenv(int argc, char **argv, shell_t *shell){}; 
+builtin_env(int argc, char **argv, shell_t *shell){}; 
 
-builtin_pwd(){}; 
-builtin_which(){}; 
+; 
 */
 
 //TODO: Replace string functions with own version? 
