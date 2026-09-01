@@ -301,12 +301,23 @@ int builtin_which(int argc, char **argv, shell_t *shell){
     free(temp_argv); 
     return status; 
 }
+//!USES STRLEN
+void builtin_env(int argc, char **argv, shell_t *shell){
+    (void)argc;
+    (void)argv;
 
+    int i = 0;
+    while(shell->shell_envp[i] != NULL){
+        write(1, shell->shell_envp[i], strlen(shell->shell_envp[i])); 
+        write(1, "\n", 1); 
+        i++; 
+    }
+}; 
 /*
 builtin_cd(int argc, char **argv, shell_t *shell){}; 
 builtin_setenv(int argc, char **argv, shell_t *shell){}; 
 builtin_unsetenv(int argc, char **argv, shell_t *shell){}; 
-builtin_env(int argc, char **argv, shell_t *shell){}; 
+
 
 ; 
 */
