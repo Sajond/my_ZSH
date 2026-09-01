@@ -351,8 +351,31 @@ char *home_search(shell_t *shell){
     }
     return NULL; 
 }; 
+
+int builtin_setenv(int argc, char **argv, shell_t *shell){
+     
+    // setenv HOME 
+    
+}; 
+//!USES STRLEN
+char *prefix_search(shell_t *shell, char **argv){
+    char *prefix = argv[1]; char *path; int i = 0; 
+
+    while(shell->shell_envp[i] != NULL){ 
+        if(strncmp(shell->shell_envp[i], prefix, strlen(prefix)) == 0 
+        && (shell->shell_envp[i][strlen(prefix)] == '=')){
+            path = shell->shell_envp[i]; 
+            return path;
+            
+        }else { 
+            i++; 
+        }
+    }
+    return NULL; 
+}
+
 /*
-builtin_setenv(int argc, char **argv, shell_t *shell){}; 
+
 builtin_unsetenv(int argc, char **argv, shell_t *shell){}; 
 
 
