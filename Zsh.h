@@ -52,4 +52,4 @@ int builtin_echo(int argc, char **argv, shell_t *shell);
 int builtin_exit(int argc, char **argv, shell_t *shell); 
 int builtin_pwd(int argc, char **argv, shell_t *shell); 
 int builtin_which(int argc, char **argv, shell_t *shell); 
-void builtin_env(int argc, char **argv, shell_t *shell); 
+int builtin_env(int argc, char **argv, shell_t *shell); 

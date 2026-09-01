@@ -302,7 +302,7 @@ int builtin_which(int argc, char **argv, shell_t *shell){
     return status; 
 }
 //!USES STRLEN
-void builtin_env(int argc, char **argv, shell_t *shell){
+int builtin_env(int argc, char **argv, shell_t *shell){
     (void)argc;
     (void)argv;
 
@@ -312,6 +312,7 @@ void builtin_env(int argc, char **argv, shell_t *shell){
         write(1, "\n", 1); 
         i++; 
     }
+    return 0; 
 }; 
 /*
 builtin_cd(int argc, char **argv, shell_t *shell){}; 
