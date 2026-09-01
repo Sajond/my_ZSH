@@ -4,14 +4,16 @@
 builtin_t builtins_list[]= {
     {"echo", builtin_echo}, 
     {"exit", builtin_exit},
-    //?DEBUG
-    /*
-    {"cd", builtin_cd},
-    {"setenv", builtin_setenv},
-    {"unsetenv", builtin_unsetenv},
     {"env", builtin_env},   
     {"pwd", builtin_pwd},
     {"which", builtin_which},
+    {"cd", builtin_cd},
+    //?DEBUG
+    /*
+    
+    {"setenv", builtin_setenv},
+    {"unsetenv", builtin_unsetenv},
+   
     */
     {NULL, NULL}
 }; 
@@ -275,7 +277,8 @@ int builtin_pwd(int argc, char **argv, shell_t *shell){
 
     char *working_dir = getcwd(NULL, 0);
     if(working_dir == NULL){return 1;}
-    write(1, working_dir, strlen(working_dir)); 
+    write(1, working_dir, strlen(working_dir));
+    write(1, "\n", 1);  
     free(working_dir); 
     return 0; 
 }
@@ -292,6 +295,7 @@ int builtin_which(int argc, char **argv, shell_t *shell){
     char *path = NULL; 
     if ((path = find_programme_path(shell, temp_argv)) != NULL){
         write(1, path, strlen(path)); 
+        write(1, "\n", 1); 
         free(path); 
 
     } else {
@@ -314,8 +318,40 @@ int builtin_env(int argc, char **argv, shell_t *shell){
     }
     return 0; 
 }; 
+
+int builtin_cd(int argc, char **argv, shell_t *shell){
+    (void)argc; (void)shell;
+    if(argv[1] == NULL){
+
+       char *path = home_search(shell); 
+       if(path == NULL){ 
+        write(1, "HOME not set\n", 13); 
+        return 1;
+       }
+       if(chdir(path) != 0){
+        perror(""); 
+        return 1; 
+       }
+    } else if((chdir(argv[1]) != 0)){
+        perror(""); 
+        return 1; 
+    } 
+    return 0; 
+}; 
+
+char *home_search(shell_t *shell){
+    int i = 0; char *path; 
+    while(shell->shell_envp[i] != NULL){
+        if(strncmp(shell->shell_envp[i], HOME_PREFIX, 5) != 0){
+            i++; 
+        } else { 
+            path = shell->shell_envp[i] + 5; 
+            return path; 
+        }
+    }
+    return NULL; 
+}; 
 /*
-builtin_cd(int argc, char **argv, shell_t *shell){}; 
 builtin_setenv(int argc, char **argv, shell_t *shell){}; 
 builtin_unsetenv(int argc, char **argv, shell_t *shell){}; 
 

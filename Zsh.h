@@ -8,6 +8,7 @@
 #define DELIM " \t\n"
 #define MAX_ARGS 100 //used to avoid double pass in tokeniser (100 args is reasonable for a shell)
 #define PATH_PREFIX "PATH="
+#define HOME_PREFIX "HOME="
 
 /* Builtin command descriptor
  * defines a type which is a pointer to a function that takes argc and argvv (as most builtins will) args will be defined by the parser. 
@@ -46,6 +47,7 @@ void build_full_path(char *full_path, char *directory, char **argv);
 char *search_path(shell_t *shell, char **argv, int i);
 char *search_directory(char *directory, char **argv); 
 int execute_programme_path(char *programme_path, char **argv, shell_t *shell); 
+char *home_search(shell_t *shell); 
 
 // ----------------------------------------------------------- BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 int builtin_echo(int argc, char **argv, shell_t *shell);
@@ -53,3 +55,4 @@ int builtin_exit(int argc, char **argv, shell_t *shell);
 int builtin_pwd(int argc, char **argv, shell_t *shell); 
 int builtin_which(int argc, char **argv, shell_t *shell); 
 int builtin_env(int argc, char **argv, shell_t *shell); 
+int builtin_cd(int argc, char **argv, shell_t *shell); 
