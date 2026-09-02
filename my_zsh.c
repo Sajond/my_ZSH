@@ -282,16 +282,21 @@ int builtin_echo(int argc, char **argv, shell_t *shell){
 }; 
 
 int builtin_exit(int argc, char **argv, shell_t *shell){
-    (void)argc;
     (void)argv; 
+    if (argc != 1) {
+        write(2, "exit: no arguments expected\n", 28);
+        return 1;
+    }
     shell->running = 0; 
     return 0; 
 }; 
 //!USES STRLEN
-int builtin_pwd(int argc, char **argv, shell_t *shell){
-    (void) argc; 
-    (void)argv; 
-    (void)shell; 
+int builtin_pwd(int argc, char **argv, shell_t *shell){ 
+    (void)argv; (void)shell; 
+    if (argc != 1) {
+        write(2, "pwd: no arguments expected\n", 27);
+        return 1;
+    }
 
     char *working_dir = getcwd(NULL, 0);
     if(working_dir == NULL){return 1;}
@@ -302,7 +307,7 @@ int builtin_pwd(int argc, char **argv, shell_t *shell){
 }
 
 int builtin_which(int argc, char **argv, shell_t *shell){
-    (void)argc; 
+    if (argc != 2) {write(2, "which: expected NAME\n", 21);return 1;}
     int status = 0; 
     //new argv given to allow functionality of find programme functioin, else would read the command as part of the path search.    
     char **temp_argv = malloc(sizeof(char *) * 2); 
@@ -319,15 +324,16 @@ int builtin_which(int argc, char **argv, shell_t *shell){
     } else {
         status = 1;
     }
-
     free(temp_argv); 
     return status; 
 }
 //!USES STRLEN
 int builtin_env(int argc, char **argv, shell_t *shell){
-    (void)argc;
     (void)argv;
-
+    if (argc != 1) {
+        write(2, "env: no arguments expected\n", 27);
+        return 1;
+    }
     int i = 0;
     while(shell->shell_envp[i] != NULL){
         write(1, shell->shell_envp[i], strlen(shell->shell_envp[i])); 
@@ -338,7 +344,11 @@ int builtin_env(int argc, char **argv, shell_t *shell){
 }; 
 
 int builtin_cd(int argc, char **argv, shell_t *shell){
-    (void)argc; (void)shell;
+    (void)shell;
+    if (argc > 2) {
+        write(2, "cd: too many arguments\n", 23);
+        return 1;
+    }
     if(argv[1] == NULL){
 
        char *path = home_search(shell); 
@@ -413,4 +423,4 @@ int builtin_unsetenv(int argc, char **argv, shell_t *shell){
 
 
 //TODO: Replace string functions with own version? 
-//TODO: implement builtins. 
+//TODO: guard segfault dumps on incorrect argc for builtin
