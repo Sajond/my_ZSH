@@ -60,3 +60,4 @@ int builtin_which(int argc, char **argv, shell_t *shell);
 int builtin_env(int argc, char **argv, shell_t *shell); 
 int builtin_cd(int argc, char **argv, shell_t *shell); 
 int builtin_setenv(int argc, char **argv, shell_t *shell); 
+int builtin_unsetenv(int argc, char **argv, shell_t *shell); 
