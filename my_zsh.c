@@ -326,7 +326,7 @@ int builtin_cd(int argc, char **argv, shell_t *shell){
 
        char *path = home_search(shell); 
        if(path == NULL){ 
-        write(1, "HOME not set\n", 13); 
+        write(2, "HOME not set\n", 13); 
         return 1;
        }
        if(chdir(path) != 0){
@@ -354,7 +354,7 @@ char *home_search(shell_t *shell){
 }; 
 
 int builtin_setenv(int argc, char **argv, shell_t *shell){
-    (void)argc; 
+    if(argc != 3){write(2, "setenv: expected NAME VALUE\n", 28); return 1;}
     char *new_string = malloc((strlen(argv[1]) + strlen(argv[2]) + 2)); 
     if(new_string == NULL){perror("Setenv malloc\n"); return 1;}
     build_replacement_string(argv, new_string); //build e.g FOO + = + newstringvalue
@@ -414,8 +414,9 @@ char **reallocate_env(char **current_env, char *new_string){
    new_env[count + 1] = NULL; 
 
    return new_env; 
-
 }
+
+
 /*
 
 builtin_unsetenv(int argc, char **argv, shell_t *shell){}; 
