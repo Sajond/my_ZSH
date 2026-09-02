@@ -8,10 +8,11 @@ builtin_t builtins_list[]= {
     {"pwd", builtin_pwd},
     {"which", builtin_which},
     {"cd", builtin_cd},
+    {"setenv", builtin_setenv},
     //?DEBUG
     /*
     
-    {"setenv", builtin_setenv},
+    
     {"unsetenv", builtin_unsetenv},
    
     */
@@ -98,12 +99,12 @@ char **copy_env(char **envp){
     } 
 
     char **new_env = malloc(sizeof(char *) * (count + 1)); 
-    if(new_env == NULL){printf("malloc for array pointers failed\n"); return NULL;} 
+    if(new_env == NULL){perror("malloc for array pointers failed\n"); return NULL;} 
     new_env[count] = NULL; 
     
     for(int i = 0; envp[i] != NULL; i++){
         new_env[i] = malloc(sizeof(char) * (strlen(envp[i]) + 1)); 
-        if(new_env[i] == NULL){printf("Malloc for env %d failed\n", i); free_env(new_env); return NULL;} 
+        if(new_env[i] == NULL){perror("Malloc for env variable failed\n"); free_env(new_env); return NULL;} 
         strcpy(new_env[i], envp[i]); 
     }
 
@@ -353,19 +354,34 @@ char *home_search(shell_t *shell){
 }; 
 
 int builtin_setenv(int argc, char **argv, shell_t *shell){
-     
-    // setenv HOME 
-    
+    (void)argc; 
+    char *new_string = malloc((strlen(argv[1]) + strlen(argv[2]) + 2)); 
+    if(new_string == NULL){perror("Setenv malloc\n"); return 1;}
+    build_replacement_string(argv, new_string); //build e.g FOO + = + newstringvalue
+
+    char **slot; 
+    //*slot = char pointing to PREFIX=
+    if((slot = prefix_search(shell, argv)) != NULL){ //address of shell slot
+        free(*slot); 
+        *slot = new_string;
+        return 0;
+        
+    } else { 
+        char **new_env = reallocate_env(shell->shell_envp, new_string); 
+        if(new_env == NULL){perror("Env reallocation failed\n"); return 1;}
+        free(shell->shell_envp); 
+        shell->shell_envp = new_env; 
+        return 0; 
+    }
 }; 
 //!USES STRLEN
-char *prefix_search(shell_t *shell, char **argv){
-    char *prefix = argv[1]; char *path; int i = 0; 
+char **prefix_search(shell_t *shell, char **argv){
+    char *prefix = argv[1]; int i = 0; 
 
     while(shell->shell_envp[i] != NULL){ 
         if(strncmp(shell->shell_envp[i], prefix, strlen(prefix)) == 0 
         && (shell->shell_envp[i][strlen(prefix)] == '=')){
-            path = shell->shell_envp[i]; 
-            return path;
+            return &shell->shell_envp[i];
             
         }else { 
             i++; 
@@ -374,6 +390,32 @@ char *prefix_search(shell_t *shell, char **argv){
     return NULL; 
 }
 
+//! STRCAT 
+void build_replacement_string(char **argv, char *replacement_string){
+    replacement_string[0] = '\0'; 
+    strncat(replacement_string, argv[1], strlen(argv[1])); 
+    strcat(replacement_string, "="); 
+    strncat(replacement_string, argv[2], strlen(argv[2])); 
+}
+
+char **reallocate_env(char **current_env, char *new_string){
+    int count = 0;  
+    for(int i = 0; current_env[i] != NULL; i++){
+       count++; 
+   } 
+
+   char **new_env = malloc(sizeof(char *) * (count + 2)); // + 2 to account for the new variable being added and NULL. 
+   if(new_env == NULL){perror("malloc for array pointers failed\n"); return NULL;} 
+
+   for(int i = 0; i < count; i++){
+    new_env[i] = current_env[i]; 
+   }
+   new_env[count] = new_string; 
+   new_env[count + 1] = NULL; 
+
+   return new_env; 
+
+}
 /*
 
 builtin_unsetenv(int argc, char **argv, shell_t *shell){}; 
