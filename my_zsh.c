@@ -20,8 +20,6 @@ builtin_t builtins_list[]= {
     if(shell->shell_envp != NULL){
         shell->running = 1; 
         shell->builtins = builtins_list;
-        //?DEBUG 
-        printf("Shell intiialised\n"); 
         return 0; 
     } 
     return 1;   
@@ -38,26 +36,12 @@ int shell_loop(shell_t *shell){
 
         if(getline(&line, &size, stdin) == -1){perror("Failed to get line from stdin"); exit_status = 1; break;}
 
-        //?DEBUG 
-        //printf("received line: %s\n", line); 
-        //printf("line size is: %zu\n", size); 
-       
         tokenise_input(&token_count, argv, line);        // line is valid - > parse
 
-        /*
-        //?DEBUG token print
-        for(int i = 0; argv[i] != NULL; i++){
-            printf("argv [%d] = %s\n", i, argv[i]); 
-            if(argv[i + 1] == NULL){printf("argv [%d] = NULL\n", i + 1);}
-        }
-        */
-        
        if(token_count > 0){
         execute_command(argv, builtins_list, token_count, shell); 
        }
  
-        //?DEBUG
-        //printf("Reached end of iteration, waiting for next input\n");
     }
     cleanup:     //on break free the shell and exit
     free(line); 
@@ -69,8 +53,7 @@ void execute_command(char **argv, builtin_t *builtins_list, int token_count, she
     int index; 
     if((index = exists_as_builtin(argv, builtins_list)) != -1){
         builtins_list[index].function(token_count, argv, shell);
-        //DEBUG
-        printf("DEBUG: programme executed as builtin\n"); 
+
     } else{ 
         char *programme_path; 
 
@@ -162,7 +145,6 @@ char *find_programme_path(shell_t *shell, char**argv){
            return result; 
         }   
     }
-    printf("DEBUG: programme doesnt exist\n");
     return NULL;
 }
 //! REPLACE WITH NON STRNCAT VERSION 
@@ -201,8 +183,7 @@ char *search_directory(char *directory, char **argv){
          struct stat file_info; 
 
         if(stat(full_path, &file_info) == 0 && S_ISREG(file_info.st_mode) && (file_info.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))){
-            //file exists & is an executable file 
-            printf("DEBUG: PATH executable found\n"); 
+            //file exists & is an executable file.
             return full_path; 
 
             } else { 
