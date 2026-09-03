@@ -237,12 +237,32 @@ char **prefix_search(shell_t *shell, char **argv){
     return NULL; 
 }
 
-//! STRCAT 
-void build_replacement_string(char **argv, char *replacement_string){
-    replacement_string[0] = '\0'; 
-    strncat(replacement_string, argv[1], strlen(argv[1])); 
-    strcat(replacement_string, "="); 
-    strncat(replacement_string, argv[2], strlen(argv[2])); 
+char **setenv_prefix_search(shell_t *shell, char **argv){ 
+    int count = 0; 
+    for(int i = 0; argv[1][i] != '=' && argv[1][i] != '\0'; i++){ 
+        count++; 
+    }
+
+    if(argv[1][count] == '\0'){
+        write(2, "setenv: expected NAME=VALUE\n", 28); 
+        return NULL; 
+    }
+
+    int i = 0; 
+    while(shell->shell_envp[i] != NULL){
+        if(strncmp(shell->shell_envp[i], argv[1], count) == 0 && (shell->shell_envp[i][count] == '=')){
+            return &shell->shell_envp[i]; 
+        } else{ 
+            i++; 
+        }
+    }
+    return NULL; 
+}
+
+
+void copy_replacement_string(char **argv, char *replacement_string){ 
+    strncpy(replacement_string, argv[1], strlen(argv[1])); 
+    replacement_string[strlen(argv[1])] = '\0'; 
 }
 
 char **reallocate_env(char **current_env, char *new_string){
@@ -265,6 +285,8 @@ char **reallocate_env(char **current_env, char *new_string){
 
 // ------------------------------------------------------------------------------------------------ BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 //! USES STRLEN FUNCTION
+//todo: Need to handle variable expansion when $ seen in echo 
+
 int builtin_echo(int argc, char **argv, shell_t *shell){
     (void)argc;
     (void)shell; 
@@ -380,22 +402,23 @@ char *home_search(shell_t *shell){
     return NULL; 
 }; 
 
+
 int builtin_setenv(int argc, char **argv, shell_t *shell){
-    if(argc != 3){write(2, "setenv: expected NAME VALUE\n", 28); return 1;}
-    char *new_string = malloc((strlen(argv[1]) + strlen(argv[2]) + 2)); 
+    if(argc != 2){write(2, "setenv: expected NAME=VALUE\n", 28); return 1;}
+    char *new_string = malloc((strlen(argv[1]) + 1)); 
     if(new_string == NULL){perror("Setenv malloc\n"); return 1;}
-    build_replacement_string(argv, new_string); //build e.g FOO + = + newstringvalue
+    copy_replacement_string(argv, new_string); //build e.g FOO + = + newstringvalue
 
     char **slot; 
     //*slot = char pointing to PREFIX=
-    if((slot = prefix_search(shell, argv)) != NULL){ //address of shell slot
+    if((slot = setenv_prefix_search(shell, argv)) != NULL){ //address of shell slot
         free(*slot); 
         *slot = new_string;
         return 0;
         
     } else { 
         char **new_env = reallocate_env(shell->shell_envp, new_string); 
-        if(new_env == NULL){perror("Env reallocation failed\n"); return 1;}
+        if(new_env == NULL){return 1;}
         free(shell->shell_envp); 
         shell->shell_envp = new_env; 
         return 0; 
@@ -423,4 +446,3 @@ int builtin_unsetenv(int argc, char **argv, shell_t *shell){
 
 
 //TODO: Replace string functions with own version? 
-//TODO: guard segfault dumps on incorrect argc for builtin

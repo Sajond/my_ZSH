@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 
 #define DELIM " \t\n"
-#define MAX_ARGS 100 //used to avoid double pass in tokeniser (100 args is reasonable for a shell)
+#define MAX_ARGS 100 
 #define PATH_PREFIX "PATH="
 #define HOME_PREFIX "HOME="
 
@@ -49,9 +49,9 @@ char *search_directory(char *directory, char **argv);
 int execute_programme_path(char *programme_path, char **argv, shell_t *shell); 
 char *home_search(shell_t *shell); 
 char **reallocate_env(char **current_env, char *new_string); 
-void build_replacement_string(char **argv, char *replacement_string); 
 char **prefix_search(shell_t *shell, char **argv); 
-
+char **setenv_prefix_search(shell_t *shell, char **argv); 
+void copy_replacement_string(char **argv, char *replacement_string); 
 // ----------------------------------------------------------- BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 int builtin_echo(int argc, char **argv, shell_t *shell);
 int builtin_exit(int argc, char **argv, shell_t *shell); 
