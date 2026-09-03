@@ -49,7 +49,7 @@ char *search_directory(char *directory, char **argv);
 int execute_programme_path(char *programme_path, char **argv, shell_t *shell); 
 char *home_search(shell_t *shell); 
 char **reallocate_env(char **current_env, char *new_string); 
-char **prefix_search(shell_t *shell, char **argv); 
+char **prefix_search(shell_t *shell, char *prefix); 
 char **setenv_prefix_search(shell_t *shell, char **argv); 
 void copy_replacement_string(char **argv, char *replacement_string); 
 // ----------------------------------------------------------- BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------

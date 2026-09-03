@@ -222,8 +222,8 @@ return 1;
 
 }
 
-char **prefix_search(shell_t *shell, char **argv){
-    char *prefix = argv[1]; int i = 0; 
+char **prefix_search(shell_t *shell, char *prefix){
+ int i = 0; 
 
     while(shell->shell_envp[i] != NULL){ 
         if(strncmp(shell->shell_envp[i], prefix, strlen(prefix)) == 0 
@@ -283,6 +283,15 @@ char **reallocate_env(char **current_env, char *new_string){
    return new_env; 
 }
 
+void std_echo_out(char **argv){ 
+    for(int i = 1; argv[i] != NULL; i++){ 
+        write(1, argv[i], strlen(argv[i])); 
+        if(argv[i + 1] != NULL){ 
+            write(1, " ", 1); 
+        }
+    }
+    write(1, "\n", 1); 
+}
 // ------------------------------------------------------------------------------------------------ BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 //! USES STRLEN FUNCTION
 //todo: Need to handle variable expansion when $ seen in echo 
@@ -290,15 +299,24 @@ char **reallocate_env(char **current_env, char *new_string){
 int builtin_echo(int argc, char **argv, shell_t *shell){
     (void)argc;
     (void)shell; 
-
-    for (int i = 1; argv[i] != NULL; i++){
-            write(1, argv[i], strlen(argv[i])); 
-
-            if(argv[i + 1] != NULL){
-                write(1, " ", 1); 
+    
+    int i = 0; 
+    if(argv[1][i] == '$'){
+        
+        char **slot; 
+        if((slot = prefix_search(shell, argv[1] + 1)) != NULL){
+            while((*slot)[i] != '=' && (*slot)[i] != '\0'){
+                i++; 
             }
+            char *value = *slot + i + 1; 
+            write(1, value, strlen(value)); 
+            write(1, "\n", 1);
+            return 0; 
+        }
+        write(1, "\n", 1); 
+        return 0; 
     }
-    write(1,"\n", 1); 
+    std_echo_out(argv); 
     
     return 0; 
 }; 
@@ -429,7 +447,7 @@ int builtin_setenv(int argc, char **argv, shell_t *shell){
 int builtin_unsetenv(int argc, char **argv, shell_t *shell){
     if(argc != 2){write(2, "unsetenv: expected NAME\n", 25); return 1;}
     char **slot; 
-    if((slot = prefix_search(shell, argv)) != NULL){
+    if((slot = prefix_search(shell, argv[1])) != NULL){
         free(*slot); 
         while(*(slot + 1) != NULL){
             *slot = *(slot + 1); 
