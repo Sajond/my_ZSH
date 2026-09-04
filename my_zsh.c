@@ -4,6 +4,7 @@
 builtin_t builtins_list[]= {
     {"echo", builtin_echo}, 
     {"exit", builtin_exit},
+    {"quit", builtin_exit},
     {"env", builtin_env},   
     {"pwd", builtin_pwd},
     {"which", builtin_which},
