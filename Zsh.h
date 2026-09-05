@@ -53,6 +53,8 @@ char **reallocate_env(char **current_env, char *new_string);
 char **prefix_search(shell_t *shell, char *prefix); 
 char **setenv_prefix_search(shell_t *shell, char **argv); 
 void copy_replacement_string(char **argv, char *replacement_string); 
+char *get_cd_target(char **argv, shell_t *shell); 
+int change_directory(char *target); 
 // ----------------------------------------------------------- BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 int builtin_echo(int argc, char **argv, shell_t *shell);
 int builtin_exit(int argc, char **argv, shell_t *shell); 
