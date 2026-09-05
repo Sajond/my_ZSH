@@ -28,6 +28,7 @@ typedef struct builtin {
 	int running; 
 	char **shell_envp; 
 	builtin_t *builtins; 
+	char *previous_dir; 
  } shell_t;
 
 /* Example declaration (define the array in a .c file):

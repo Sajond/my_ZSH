@@ -21,6 +21,7 @@ builtin_t builtins_list[]= {
     if(shell->shell_envp != NULL){
         shell->running = 1; 
         shell->builtins = builtins_list;
+        shell->previous_dir = NULL; 
         return 0; 
     } 
     return 1;   
@@ -260,7 +261,6 @@ char **setenv_prefix_search(shell_t *shell, char **argv){
     return NULL; 
 }
 
-
 void copy_replacement_string(char **argv, char *replacement_string){ 
     strncpy(replacement_string, argv[1], strlen(argv[1])); 
     replacement_string[strlen(argv[1])] = '\0'; 
@@ -295,8 +295,6 @@ void std_echo_out(char **argv){
 }
 // ------------------------------------------------------------------------------------------------ BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 //! USES STRLEN FUNCTION
-//todo: Need to handle variable expansion when $ seen in echo 
-
 int builtin_echo(int argc, char **argv, shell_t *shell){
     (void)argc;
     (void)shell; 
@@ -384,27 +382,31 @@ int builtin_env(int argc, char **argv, shell_t *shell){
     return 0; 
 }; 
 
+//todo: handle the "cd -" command where it returns to the previous directory
 int builtin_cd(int argc, char **argv, shell_t *shell){
     (void)shell;
-    if (argc > 2) {
-        write(2, "cd: too many arguments\n", 23);
-        return 1;
-    }
-    if(argv[1] == NULL){
+    if (argc > 2) {write(2, "cd: too many arguments\n", 23); return 1;}
 
+    //? set the current dir so that we can change easily
+    char* current_dir; 
+    if(getcwd(current_dir, strlen(current_dir) == NULL)){perror(""); return 1;}
+
+    if(argv[1] == NULL){
        char *path = home_search(shell); 
-       if(path == NULL){ 
-        write(2, "HOME not set\n", 13); 
-        return 1;
-       }
+       if(path == NULL){write(2, "HOME not set\n", 13); return 1;}
+
        if(chdir(path) != 0){
         perror(""); 
         return 1; 
-       }
+
+       } 
+       //add else branch for getCWD/ set prev dir
+
     } else if((chdir(argv[1]) != 0)){
         perror(""); 
         return 1; 
     } 
+    //add else branch for getCWD/ set prev dir 
     return 0; 
 }; 
 //! strncmp
@@ -462,6 +464,3 @@ int builtin_unsetenv(int argc, char **argv, shell_t *shell){
     return 1;
 }; 
 
-
-
-//TODO: Replace string functions with own version? 
