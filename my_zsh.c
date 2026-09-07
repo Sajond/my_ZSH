@@ -51,22 +51,28 @@ int shell_loop(shell_t *shell){
     free(argv); 
     return exit_status; 
 }
-void execute_command(char **argv, builtin_t *builtins_list, int token_count, shell_t *shell ){
-    int index; 
+//todo: add a branch to execute based off of a direct ./ "programme name" that is not found in path
+int execute_command(char **argv, builtin_t *builtins_list, int token_count, shell_t *shell ){
+    int index; int status = 0; 
     if((index = exists_as_builtin(argv, builtins_list)) != -1){
-        builtins_list[index].function(token_count, argv, shell);
+       status = builtins_list[index].function(token_count, argv, shell);
 
-    } else{ 
+    } else if(argv[0][0] == '.' && argv[0][1] == '/'){
+        if(execute_programme_path(argv[0], argv, shell) != 0){
+            status = 1; 
+        }
+    } else {
         char *programme_path; 
-
         if((programme_path = find_programme_path(shell, argv)) != NULL){
             if(execute_programme_path(programme_path, argv, shell) != 0){
-                perror("Error with programme path execution\n"); 
+                status = 1; 
             }      
-        } else {perror("");}
-
+        } else { 
+            status = 1; 
+        }
         free(programme_path); 
     }
+    return status; 
 }
 // ------------------------------------------------------------------------------------------------ FUNCTIONS ----------------------------------------------------------------------------------------------
 
@@ -208,7 +214,11 @@ if(pid > 0){
         }
         return 0; 
 
+        //SEGFAULT CHECK HERE FOR GANDALF
     } else if(WIFSIGNALED(status)){
+        if(WTERMSIG(status) == SIGSEGV){
+            write(2, "segmentation fault\n", 19);
+        }
         return 1;
     }
  
@@ -217,11 +227,14 @@ if(pid > 0){
     if(execve(programme_path, argv, shell->shell_envp) == -1){
         perror("execve\n"); 
         exit(1); 
-    }; 
-}
-perror("Fork failed\n"); 
-return 1; 
 
+    }
+
+}else {
+    perror("Fork failed\n"); 
+    return 1; 
+}
+return 1; 
 }
 
 char **prefix_search(shell_t *shell, char *prefix){

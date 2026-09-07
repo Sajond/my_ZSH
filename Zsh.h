@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <signal.h>
 
 #define DELIM " \t\n"
 #define MAX_ARGS 100 
@@ -41,7 +42,7 @@ char **copy_env(char **envp);
 void free_env(char **new_env); 
 int print_base_prompt(); 
 void tokenise_input(int *argc, char **argv, char *line); 
-void execute_command(char **argv, builtin_t *builtins_list, int token_count, shell_t *shell ); 
+int execute_command(char **argv, builtin_t *builtins_list, int token_count, shell_t *shell ); 
 int exists_as_builtin(char **argv, builtin_t *builtins_list); 
 char *find_programme_path(shell_t *shell, char**argv);
 void build_full_path(char *full_path, char *directory, char **argv); 
