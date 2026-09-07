@@ -66,3 +66,7 @@ int builtin_env(int argc, char **argv, shell_t *shell);
 int builtin_cd(int argc, char **argv, shell_t *shell); 
 int builtin_setenv(int argc, char **argv, shell_t *shell); 
 int builtin_unsetenv(int argc, char **argv, shell_t *shell); 
+// ------------------------------------------------------------------------------------------------ UTILITY FUNCTION DECLARATIONS ---------------------------------------------------------------------------------------------
+size_t my_strlen(char *string); 
+int my_strcmp(const char *s1, const char *s2); 
+int my_strncmp(const char *s1, const char *s2, size_t n); 

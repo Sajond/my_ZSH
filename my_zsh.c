@@ -58,17 +58,14 @@ int execute_command(char **argv, builtin_t *builtins_list, int token_count, shel
        status = builtins_list[index].function(token_count, argv, shell);
 
     } else if(argv[0][0] == '.' && argv[0][1] == '/'){
-        if(execute_programme_path(argv[0], argv, shell) != 0){
-            status = 1; 
-        }
+        if(execute_programme_path(argv[0], argv, shell) != 0){status = 1;}
     } else {
         char *programme_path; 
         if((programme_path = find_programme_path(shell, argv)) != NULL){
-            if(execute_programme_path(programme_path, argv, shell) != 0){
-                status = 1; 
-            }      
+            if(execute_programme_path(programme_path, argv, shell) != 0){status = 1;}      
         } else { 
             status = 1; 
+            write(2, "command not found\n", 18);
         }
         free(programme_path); 
     }
@@ -88,7 +85,7 @@ char **copy_env(char **envp){
     new_env[count] = NULL; 
     
     for(int i = 0; envp[i] != NULL; i++){
-        new_env[i] = malloc(sizeof(char) * (strlen(envp[i]) + 1)); 
+        new_env[i] = malloc(sizeof(char) * (my_strlen(envp[i]) + 1)); 
         if(new_env[i] == NULL){perror("Malloc for env variable failed\n"); free_env(new_env); return NULL;} 
         strcpy(new_env[i], envp[i]); 
     }
@@ -107,7 +104,7 @@ int print_base_prompt(){
    char *cwd = getcwd(NULL, 0); 
    if(cwd == NULL){return 1;} 
     write(1, "[", 1); 
-    write(1, cwd, strlen(cwd));
+    write(1, cwd, my_strlen(cwd));
     write(1, "]>", 2); 
     free(cwd);
     return 0;
@@ -133,7 +130,7 @@ int exists_as_builtin(char **argv, builtin_t *builtins_list){
 
     int i = 0; 
     while(builtins_list[i].name != NULL){
-        if(strcmp(argv[0], builtins_list[i].name) == 0){
+        if(my_strcmp(argv[0], builtins_list[i].name) == 0){
             return i;
         } else {
             i++; 
@@ -146,7 +143,7 @@ char *find_programme_path(shell_t *shell, char**argv){
     int i = 0; 
     while(shell->shell_envp[i] != NULL){
         //for every string at position I, check the beginning to see if it matches PATH=
-        if(strncmp(shell->shell_envp[i], PATH_PREFIX, 5) != 0){
+        if(my_strncmp(shell->shell_envp[i], PATH_PREFIX, 5) != 0){
             i++;} 
         else{
            char *result = search_path(shell, argv, i); 
@@ -158,13 +155,13 @@ char *find_programme_path(shell_t *shell, char**argv){
 //! REPLACE WITH NON STRNCAT VERSION 
 void build_full_path(char *full_path, char *directory, char **argv){
     full_path[0] = '\0'; 
-    strncat(full_path, directory, strlen(directory)); 
+    strncat(full_path, directory, my_strlen(directory)); 
     strcat(full_path, "/"); 
-    strncat(full_path, argv[0], strlen(argv[0])); 
+    strncat(full_path, argv[0], my_strlen(argv[0])); 
 }
 //!STRLEN 
 char *search_path(shell_t *shell, char **argv, int i){
-    char *path_string = malloc(strlen(shell->shell_envp[i]) + 1);
+    char *path_string = malloc(my_strlen(shell->shell_envp[i]) + 1);
         if(path_string == NULL){perror("Malloc failed\n"); return NULL;}
         strcpy(path_string, shell->shell_envp[i]);
         char *directories = path_string + 5; 
@@ -183,7 +180,7 @@ char *search_path(shell_t *shell, char **argv, int i){
 }
 //!STRLEN
 char *search_directory(char *directory, char **argv){
-    char *full_path = malloc(strlen(directory) + strlen(argv[0]) + 2); 
+    char *full_path = malloc(my_strlen(directory) + my_strlen(argv[0]) + 2); 
     if(full_path == NULL){perror("Fullpath malloc failed\n"); return NULL;}
     
     build_full_path(full_path, directory, argv); 
@@ -241,8 +238,8 @@ char **prefix_search(shell_t *shell, char *prefix){
  int i = 0; 
 
     while(shell->shell_envp[i] != NULL){ 
-        if(strncmp(shell->shell_envp[i], prefix, strlen(prefix)) == 0 
-        && (shell->shell_envp[i][strlen(prefix)] == '=')){
+        if(my_strncmp(shell->shell_envp[i], prefix, my_strlen(prefix)) == 0 
+        && (shell->shell_envp[i][my_strlen(prefix)] == '=')){
             return &shell->shell_envp[i];
             
         }else { 
@@ -265,7 +262,7 @@ char **setenv_prefix_search(shell_t *shell, char **argv){
 
     int i = 0; 
     while(shell->shell_envp[i] != NULL){
-        if(strncmp(shell->shell_envp[i], argv[1], count) == 0 && (shell->shell_envp[i][count] == '=')){
+        if(my_strncmp(shell->shell_envp[i], argv[1], count) == 0 && (shell->shell_envp[i][count] == '=')){
             return &shell->shell_envp[i]; 
         } else{ 
             i++; 
@@ -275,8 +272,8 @@ char **setenv_prefix_search(shell_t *shell, char **argv){
 }
 
 void copy_replacement_string(char **argv, char *replacement_string){ 
-    strncpy(replacement_string, argv[1], strlen(argv[1])); 
-    replacement_string[strlen(argv[1])] = '\0'; 
+    strncpy(replacement_string, argv[1], my_strlen(argv[1])); 
+    replacement_string[my_strlen(argv[1])] = '\0'; 
 }
 
 char **reallocate_env(char **current_env, char *new_string){
@@ -299,7 +296,7 @@ char **reallocate_env(char **current_env, char *new_string){
 
 void std_echo_out(char **argv){ 
     for(int i = 1; argv[i] != NULL; i++){ 
-        write(1, argv[i], strlen(argv[i])); 
+        write(1, argv[i], my_strlen(argv[i])); 
         if(argv[i + 1] != NULL){ 
             write(1, " ", 1); 
         }
@@ -344,7 +341,7 @@ int builtin_echo(int argc, char **argv, shell_t *shell){
                 i++; 
             }
             char *value = *slot + i + 1; 
-            write(1, value, strlen(value)); 
+            write(1, value, my_strlen(value)); 
             write(1, "\n", 1);
             return 0; 
         }
@@ -375,7 +372,7 @@ int builtin_pwd(int argc, char **argv, shell_t *shell){
 
     char *working_dir = getcwd(NULL, 0);
     if(working_dir == NULL){return 1;}
-    write(1, working_dir, strlen(working_dir));
+    write(1, working_dir, my_strlen(working_dir));
     write(1, "\n", 1);  
     free(working_dir); 
     return 0; 
@@ -392,7 +389,7 @@ int builtin_which(int argc, char **argv, shell_t *shell){
 
     char *path = NULL; 
     if ((path = find_programme_path(shell, temp_argv)) != NULL){
-        write(1, path, strlen(path)); 
+        write(1, path, my_strlen(path)); 
         write(1, "\n", 1); 
         free(path); 
 
@@ -411,7 +408,7 @@ int builtin_env(int argc, char **argv, shell_t *shell){
     }
     int i = 0;
     while(shell->shell_envp[i] != NULL){
-        write(1, shell->shell_envp[i], strlen(shell->shell_envp[i])); 
+        write(1, shell->shell_envp[i], my_strlen(shell->shell_envp[i])); 
         write(1, "\n", 1); 
         i++; 
     }
@@ -438,11 +435,11 @@ int builtin_cd(int argc, char **argv, shell_t *shell){
 
     return 0; 
 }; 
-//! strncmp
+//! my_strncmp
 char *home_search(shell_t *shell){
     int i = 0; char *path; 
     while(shell->shell_envp[i] != NULL){
-        if(strncmp(shell->shell_envp[i], HOME_PREFIX, 5) != 0){
+        if(my_strncmp(shell->shell_envp[i], HOME_PREFIX, 5) != 0){
             i++; 
         } else { 
             path = shell->shell_envp[i] + 5; 
@@ -452,10 +449,9 @@ char *home_search(shell_t *shell){
     return NULL; 
 }; 
 
-
 int builtin_setenv(int argc, char **argv, shell_t *shell){
     if(argc != 2){write(2, "setenv: expected NAME=VALUE\n", 28); return 1;}
-    char *new_string = malloc((strlen(argv[1]) + 1)); 
+    char *new_string = malloc((my_strlen(argv[1]) + 1)); 
     if(new_string == NULL){perror("Setenv malloc\n"); return 1;}
     copy_replacement_string(argv, new_string); //build e.g FOO + = + newstringvalue
 
@@ -493,3 +489,34 @@ int builtin_unsetenv(int argc, char **argv, shell_t *shell){
     return 1;
 }; 
 
+// ------------------------------------------------------------------------------------------------ UTILITY FUNCTION DECLARATIONS ---------------------------------------------------------------------------------------------
+
+size_t my_strlen(char *string){
+    size_t i = 0; 
+    while(string[i] != '\0'){
+        i++; 
+    }
+    return i;
+}; 
+int my_strcmp(const char *s1, const char *s2){
+    int i = 0;
+    while(s1[i] == s2[i] && s1[i] != '\0'){
+        i++; 
+    }
+    return s1[i] - s2[i]; 
+}; 
+
+int my_strncmp(const char *s1, const char *s2, size_t n){
+size_t i = 0; 
+
+if(n == 0){return 0;}
+while(i < n  && s1[i] == s2[i] && s1[i] != '\0'){
+    i++; 
+}
+
+if(i == n){return 0;}
+
+return s1[i] - s2[i]; 
+
+}; 
+int my_strcpy(); 
