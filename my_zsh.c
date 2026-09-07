@@ -51,7 +51,7 @@ int shell_loop(shell_t *shell){
     free(argv); 
     return exit_status; 
 }
-//todo: add a branch to execute based off of a direct ./ "programme name" that is not found in path
+
 int execute_command(char **argv, builtin_t *builtins_list, int token_count, shell_t *shell ){
     int index; int status = 0; 
     if((index = exists_as_builtin(argv, builtins_list)) != -1){
@@ -73,7 +73,6 @@ int execute_command(char **argv, builtin_t *builtins_list, int token_count, shel
 }
 // ------------------------------------------------------------------------------------------------ FUNCTIONS ----------------------------------------------------------------------------------------------
 
-//! TECHNICALLY STRLEN AND STRCPY are not allowed but i dont see the point, it just makes the project unecessarily repetitive. 
 char **copy_env(char **envp){
     int count = 0;  
      for(int i = 0; envp[i] != NULL; i++){
@@ -125,7 +124,7 @@ void tokenise_input(int *argc, char **argv, char *line){
     argv[count] = NULL;
     *argc = count; 
 }
-//!USES STRCMP
+
 int exists_as_builtin(char **argv, builtin_t *builtins_list){
 
     int i = 0; 
@@ -138,7 +137,7 @@ int exists_as_builtin(char **argv, builtin_t *builtins_list){
     }
     return -1; 
 }
-//!Uses STRCPY & STRLEN
+
 char *find_programme_path(shell_t *shell, char**argv){
     int i = 0; 
     while(shell->shell_envp[i] != NULL){
@@ -152,14 +151,25 @@ char *find_programme_path(shell_t *shell, char**argv){
     }
     return NULL;
 }
-//! REPLACE WITH NON STRNCAT VERSION 
+
 void build_full_path(char *full_path, char *directory, char **argv){
-    full_path[0] = '\0'; 
-    strncat(full_path, directory, my_strlen(directory)); 
-    strcat(full_path, "/"); 
-    strncat(full_path, argv[0], my_strlen(argv[0])); 
+    int i = 0; 
+    while(directory[i] != '\0'){
+        full_path[i] = directory[i]; 
+        i++; 
+    } 
+    full_path[i] = '/'; 
+    i++; 
+
+    int j = 0; 
+    while(argv[0][j] != '\0'){
+        full_path[i] = argv[0][j]; 
+        i++; 
+        j++; 
+    }
+    full_path[i] = '\0'; 
 }
-//!STRLEN 
+
 char *search_path(shell_t *shell, char **argv, int i){
     char *path_string = malloc(my_strlen(shell->shell_envp[i]) + 1);
         if(path_string == NULL){perror("Malloc failed\n"); return NULL;}
@@ -178,7 +188,7 @@ char *search_path(shell_t *shell, char **argv, int i){
       free(path_string); 
       return NULL; 
 }
-//!STRLEN
+
 char *search_directory(char *directory, char **argv){
     char *full_path = malloc(my_strlen(directory) + my_strlen(argv[0]) + 2); 
     if(full_path == NULL){perror("Fullpath malloc failed\n"); return NULL;}
@@ -362,7 +372,7 @@ int builtin_exit(int argc, char **argv, shell_t *shell){
     shell->running = 0; 
     return 0; 
 }; 
-//!USES STRLEN
+
 int builtin_pwd(int argc, char **argv, shell_t *shell){ 
     (void)argv; (void)shell; 
     if (argc != 1) {
@@ -399,7 +409,7 @@ int builtin_which(int argc, char **argv, shell_t *shell){
     free(temp_argv); 
     return status; 
 }
-//!USES STRLEN
+
 int builtin_env(int argc, char **argv, shell_t *shell){
     (void)argv;
     if (argc != 1) {
@@ -415,7 +425,6 @@ int builtin_env(int argc, char **argv, shell_t *shell){
     return 0; 
 }; 
 
-//todo: handle the "cd -" command where it returns to the previous directory
 int builtin_cd(int argc, char **argv, shell_t *shell){
     if (argc > 2) {write(2, "cd: too many arguments\n", 23); return 1;}
 
@@ -435,7 +444,7 @@ int builtin_cd(int argc, char **argv, shell_t *shell){
 
     return 0; 
 }; 
-//! my_strncmp
+
 char *home_search(shell_t *shell){
     int i = 0; char *path; 
     while(shell->shell_envp[i] != NULL){
@@ -470,7 +479,6 @@ int builtin_setenv(int argc, char **argv, shell_t *shell){
         return 0; 
     }
 }; 
-//!USES STRLEN
 
 int builtin_unsetenv(int argc, char **argv, shell_t *shell){
     if(argc != 2){write(2, "unsetenv: expected NAME\n", 25); return 1;}
@@ -498,6 +506,7 @@ size_t my_strlen(char *string){
     }
     return i;
 }; 
+
 int my_strcmp(const char *s1, const char *s2){
     int i = 0;
     while(s1[i] == s2[i] && s1[i] != '\0'){
@@ -519,6 +528,7 @@ if(i == n){return 0;}
 return s1[i] - s2[i]; 
 
 }; 
+
 char *my_strcpy(char *destination, const char *source){
 size_t i = 0; 
 
@@ -529,3 +539,7 @@ while(source[i] != '\0'){
 destination[i] = '\0'; 
 return destination; 
 }; 
+
+my_strtok(char *string, const char *delim){
+
+}
