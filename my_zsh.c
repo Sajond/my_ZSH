@@ -87,7 +87,7 @@ char **copy_env(char **envp){
     for(int i = 0; envp[i] != NULL; i++){
         new_env[i] = malloc(sizeof(char) * (my_strlen(envp[i]) + 1)); 
         if(new_env[i] == NULL){perror("Malloc for env variable failed\n"); free_env(new_env); return NULL;} 
-        strcpy(new_env[i], envp[i]); 
+        my_strcpy(new_env[i], envp[i]); 
     }
 
     return new_env;
@@ -163,7 +163,7 @@ void build_full_path(char *full_path, char *directory, char **argv){
 char *search_path(shell_t *shell, char **argv, int i){
     char *path_string = malloc(my_strlen(shell->shell_envp[i]) + 1);
         if(path_string == NULL){perror("Malloc failed\n"); return NULL;}
-        strcpy(path_string, shell->shell_envp[i]);
+        my_strcpy(path_string, shell->shell_envp[i]);
         char *directories = path_string + 5; 
         char *directory = strtok(directories, ":"); 
 
@@ -519,4 +519,13 @@ if(i == n){return 0;}
 return s1[i] - s2[i]; 
 
 }; 
-int my_strcpy(); 
+char *my_strcpy(char *destination, const char *source){
+size_t i = 0; 
+
+while(source[i] != '\0'){
+    destination[i] = source[i]; 
+    i++; 
+}
+destination[i] = '\0'; 
+return destination; 
+}; 

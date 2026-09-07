@@ -70,3 +70,4 @@ int builtin_unsetenv(int argc, char **argv, shell_t *shell);
 size_t my_strlen(char *string); 
 int my_strcmp(const char *s1, const char *s2); 
 int my_strncmp(const char *s1, const char *s2, size_t n); 
+char *my_strcpy(char *destination, const char *source); 
