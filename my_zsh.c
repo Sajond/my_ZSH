@@ -48,6 +48,7 @@ int shell_loop(shell_t *shell){
     cleanup:     //on break free the shell and exit
     free(line); 
     free_env(shell->shell_envp); 
+    free(shell->previous_dir); 
     free(argv); 
     return exit_status; 
 }
@@ -63,11 +64,11 @@ int execute_command(char **argv, builtin_t *builtins_list, int token_count, shel
         char *programme_path; 
         if((programme_path = find_programme_path(shell, argv)) != NULL){
             if(execute_programme_path(programme_path, argv, shell) != 0){status = 1;}      
+           free(programme_path); 
         } else { 
             status = 1; 
             write(2, "command not found\n", 18);
         }
-        free(programme_path); 
     }
     return status; 
 }
@@ -382,9 +383,7 @@ int change_directory(char *target){
 // ------------------------------------------------------------------------------------------------ BUILTIN DECLARATIONS ----------------------------------------------------------------------------------------------
 //! USES STRLEN FUNCTION
 int builtin_echo(int argc, char **argv, shell_t *shell){
-    (void)argc;
-    (void)shell; 
-    
+    if(argc == 1){write(1, "\n", 1); return 0;}
     int i = 0; 
     if(argv[1][i] == '$'){
         
@@ -402,7 +401,6 @@ int builtin_echo(int argc, char **argv, shell_t *shell){
         return 0; 
     }
     std_echo_out(argv); 
-    
     return 0; 
 }; 
 
