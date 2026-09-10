@@ -71,6 +71,7 @@ int execute_command(char **argv, builtin_t *builtins_list, int token_count, shel
     }
     return status; 
 }
+
 // ------------------------------------------------------------------------------------------------ FUNCTIONS ----------------------------------------------------------------------------------------------
 
 char **copy_env(char **envp){
@@ -258,21 +259,63 @@ char **prefix_search(shell_t *shell, char *prefix){
     }
     return NULL; 
 }
+//This is specifically aimed at passing the gandalf autotester as it expects "FOO=stringvalue" as a single arg. 
+int handle_gandalf_expected(char **argv, char **new_string){
+    *new_string = malloc((my_strlen(argv[1]) + 1));
 
-char **setenv_prefix_search(shell_t *shell, char **argv){ 
+    if(*new_string == NULL){
+        perror("setenv malloc");
+         return 1;
+        }
+
+    copy_replacement_string(argv, *new_string); 
+    return 0; 
+    
+}
+
+int handle_normal_setenv_input(char **argv, char **new_string){
+    *new_string = malloc((my_strlen(argv[1]) + my_strlen(argv[2]) + 2)); 
+    if(*new_string == NULL){
+        perror("setenv malloc");
+         return 1;
+        }
+    build_new_string(argv, *new_string); 
+    return 0; 
+}
+
+void build_new_string(char **argv, char *new_string){
+    size_t i = 0; 
+    while(argv[1][i] != '\0'){
+        new_string[i] = argv[1][i]; 
+        i++; 
+    }
+    new_string[i] = '='; 
+    i++; 
+    
+    size_t j = 0; 
+    while(argv[2][j] != '\0'){
+        new_string[i] = argv[2][j]; 
+        i++; 
+        j++; 
+    }
+
+    new_string[i] = '\0'; 
+}
+
+char **setenv_prefix_search(shell_t *shell, char *new_string){ 
     int count = 0; 
-    for(int i = 0; argv[1][i] != '=' && argv[1][i] != '\0'; i++){ 
+    for(int i = 0; new_string[i] != '=' && new_string[i] != '\0'; i++){ 
         count++; 
     }
 
-    if(argv[1][count] == '\0'){
-        write(2, "setenv: expected NAME=VALUE\n", 28); 
+    if(new_string[count] == '\0'){
+        write(2, "setenv: expected NAME=VALUE | NAME VALUE\n", 42); 
         return NULL; 
     }
 
     int i = 0; 
     while(shell->shell_envp[i] != NULL){
-        if(my_strncmp(shell->shell_envp[i], argv[1], count) == 0 && (shell->shell_envp[i][count] == '=')){
+        if(my_strncmp(shell->shell_envp[i], new_string, count) == 0 && (shell->shell_envp[i][count] == '=')){
             return &shell->shell_envp[i]; 
         } else{ 
             i++; 
@@ -459,21 +502,23 @@ char *home_search(shell_t *shell){
 }; 
 
 int builtin_setenv(int argc, char **argv, shell_t *shell){
-    if(argc != 2){write(2, "setenv: expected NAME=VALUE\n", 28); return 1;}
-    char *new_string = malloc((my_strlen(argv[1]) + 1)); 
-    if(new_string == NULL){perror("Setenv malloc\n"); return 1;}
-    copy_replacement_string(argv, new_string); //build e.g FOO + = + newstringvalue
-
-    char **slot; 
+    char *new_string = NULL; char **slot;
+        if(argc == 2){
+            if(handle_gandalf_expected(argv, &new_string) != 0){return 1;}
+        } else if(argc == 3){
+            if(handle_normal_setenv_input(argv, &new_string) != 0){return 1;}
+        }else {
+            write(2, "Invalid input\n",14); return 1;
+        } 
     //*slot = char pointing to PREFIX=
-    if((slot = setenv_prefix_search(shell, argv)) != NULL){ //address of shell slot
+    if((slot = setenv_prefix_search(shell, new_string)) != NULL){ //address of shell slot
         free(*slot); 
         *slot = new_string;
         return 0;
         
     } else { 
         char **new_env = reallocate_env(shell->shell_envp, new_string); 
-        if(new_env == NULL){return 1;}
+        if(new_env == NULL){free(new_string); return 1;}
         free(shell->shell_envp); 
         shell->shell_envp = new_env; 
         return 0; 
@@ -539,7 +584,3 @@ while(source[i] != '\0'){
 destination[i] = '\0'; 
 return destination; 
 }; 
-
-my_strtok(char *string, const char *delim){
-
-}
